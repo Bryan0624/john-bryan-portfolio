@@ -26,9 +26,20 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 COPY . .
 RUN composer dump-autoload --optimize \
     && php artisan package:discover --ansi || true \
-    && chmod -R 775 storage bootstrap/cache
+    && mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
+    && touch database/database.sqlite \
+    && chmod -R 775 storage bootstrap/cache database
 
-ENV PORT=10000
+ENV PORT=10000 \
+    APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_CHANNEL=stderr \
+    SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    QUEUE_CONNECTION=sync \
+    DB_CONNECTION=sqlite \
+    DB_DATABASE=/var/www/html/database/database.sqlite
+
 EXPOSE 10000
 
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}
