@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: john-bryan-portfolio
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/Bryan0624/john-bryan-portfolio
+    branch: main
+    autoDeployTrigger: commit
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: APP_KEY
+        sync: false
