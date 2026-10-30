@@ -120,16 +120,125 @@
         body {
             font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Global ambient lighting + tactile noise texture */
+        .page-ambient {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .page-ambient__glow {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(72px);
+            opacity: 0.2;
+            will-change: transform, opacity;
+        }
+
+        .page-ambient__glow--emerald {
+            top: -8%;
+            left: -6%;
+            width: 42vw;
+            height: 42vw;
+            max-width: 520px;
+            max-height: 520px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.55) 0%, transparent 70%);
+            animation: ambientPulse 10s ease-in-out infinite;
+        }
+
+        .page-ambient__glow--violet {
+            right: -8%;
+            bottom: 8%;
+            width: 46vw;
+            height: 46vw;
+            max-width: 560px;
+            max-height: 560px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, transparent 70%);
+            animation: ambientFloat 12s ease-in-out infinite;
+        }
+
+        .page-ambient__glow--teal {
+            top: 42%;
+            left: 38%;
+            width: 36vw;
+            height: 36vw;
+            max-width: 420px;
+            max-height: 420px;
+            background: radial-gradient(circle, rgba(45, 212, 191, 0.35) 0%, transparent 70%);
+            animation: ambientPulse 14s ease-in-out infinite reverse;
+        }
+
+        .page-noise {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.035;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.55) 0.6px, transparent 0.7px),
+                radial-gradient(rgba(0, 0, 0, 0.35) 0.6px, transparent 0.7px);
+            background-size: 3px 3px, 5px 5px;
+            background-position: 0 0, 1px 2px;
+            mix-blend-mode: overlay;
+        }
+
+        .dark .page-noise {
+            opacity: 0.055;
+            mix-blend-mode: soft-light;
+        }
+
+        main,
+        footer {
+            position: relative;
+            z-index: 2;
         }
 
         /* Avoid horizontal overflow from ambient blurs / absolute accents */
         section {
             overflow-x: clip;
+            position: relative;
+        }
+
+        .section-screen::before,
+        .section-screen::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(64px);
+            opacity: 0.18;
+            z-index: 0;
+        }
+
+        .section-screen::before {
+            top: 12%;
+            left: -8%;
+            width: min(28rem, 55vw);
+            height: min(28rem, 55vw);
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.45), transparent 70%);
+        }
+
+        .section-screen::after {
+            right: -10%;
+            bottom: 8%;
+            width: min(26rem, 50vw);
+            height: min(26rem, 50vw);
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.4), transparent 70%);
+        }
+
+        .section-screen > * {
+            position: relative;
+            z-index: 1;
         }
 
         /*
          * One section per viewport on desktop (nav/snap).
-         * Compact inner padding so content doesn't feel stretched.
+         * Generous vertical rhythm for a wide senior-layout feel.
          */
         .section-screen {
             box-sizing: border-box;
@@ -137,21 +246,37 @@
             scroll-snap-align: start;
             scroll-snap-stop: always;
             scroll-margin-top: 0;
-            padding-top: 5.25rem;
-            padding-bottom: 2.5rem;
+            /* Nav clearance only — vertical rhythm lives on inner containers */
+            padding-top: 5.5rem;
+            padding-bottom: 1rem;
         }
 
         #hero.section-screen {
-            padding-top: 5.5rem;
-            padding-bottom: 2.25rem;
+            min-height: 85svh;
+            justify-content: flex-start;
+            padding-top: 4.75rem;
+            padding-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            #hero.section-screen {
+                padding-top: 5rem;
+                padding-bottom: 2rem;
+            }
         }
 
         @media (max-width: 767px) {
             .section-screen {
                 min-height: auto;
                 scroll-snap-stop: normal;
+                padding-top: 4.75rem;
+                padding-bottom: 0.5rem;
+            }
+
+            #hero.section-screen {
+                min-height: auto;
                 padding-top: 4.5rem;
-                padding-bottom: 2.75rem;
+                padding-bottom: 1.25rem;
             }
         }
 
@@ -177,7 +302,7 @@
         }
 
         .glow-emerald:hover {
-            box-shadow: 0 0 28px rgba(16, 185, 129, 0.55);
+            box-shadow: 0 0 28px rgba(16, 185, 129, 0.55), 0 0 25px rgba(16, 185, 129, 0.2);
             transform: translateY(-2px);
         }
 
@@ -186,32 +311,33 @@
         }
 
         .interactive-card:hover {
-            transform: translateY(-0.5rem);
-            border-color: rgb(5 150 105 / 0.45);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 28px rgba(16, 185, 129, 0.1);
+            transform: translateY(-0.25rem);
+            border-color: rgb(16 185 129 / 0.4);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 25px rgba(16, 185, 129, 0.2);
         }
 
         .dark .interactive-card:hover {
             border-color: rgb(16 185 129 / 0.4);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 28px rgba(16, 185, 129, 0.12);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 25px rgba(16, 185, 129, 0.2);
         }
 
-        /* Premium glassmorphism cards */
+        /* Premium glassmorphism cards — global standard */
         .glass-card {
             position: relative;
             overflow: hidden;
-            border: 1px solid rgb(226 232 240 / 0.9);
-            background: rgb(255 255 255 / 0.72);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.12);
-            transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease;
+            border-radius: 1rem;
+            border: 1px solid rgb(228 228 231 / 0.9);
+            background: rgb(255 255 255 / 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
         }
 
         .dark .glass-card {
-            border-color: rgb(39 39 42 / 0.6);
+            border-color: rgb(39 39 42 / 0.8);
             background: rgb(24 24 27 / 0.4);
-            box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.45);
         }
 
         .glass-card::before {
@@ -221,19 +347,20 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background: linear-gradient(to right, transparent, rgba(16, 185, 129, 0.35), transparent);
+            background: linear-gradient(to right, transparent, rgba(16, 185, 129, 0.4), transparent);
             pointer-events: none;
             z-index: 1;
         }
 
         .glass-card:hover {
             border-color: rgb(16 185 129 / 0.4);
-            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.18), 0 0 24px rgba(16, 185, 129, 0.1);
+            transform: translateY(-0.25rem);
+            box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.16), 0 0 25px rgba(16, 185, 129, 0.2);
         }
 
         .dark .glass-card:hover {
             border-color: rgb(16 185 129 / 0.4);
-            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4), 0 0 24px rgba(16, 185, 129, 0.12);
+            box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.45), 0 0 25px rgba(16, 185, 129, 0.2);
         }
 
         /* Unified section chip + title */
@@ -262,13 +389,37 @@
 
         .section-title {
             color: #18181b;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
         }
 
         .dark .section-title {
-            background-image: linear-gradient(to right, #f4f4f5, #e4e4e7, #34d399);
+            background-image: linear-gradient(90deg, #fafafa 0%, #e4e4e7 42%, #34d399 78%, #5eead4 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+
+        .section-title-accent {
+            background-image: linear-gradient(to right, #34d399, #5eead4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dark .section-title-accent {
+            background-image: linear-gradient(to right, #34d399, #2dd4bf);
+        }
+
+        .section-lede {
+            color: #71717a;
+            line-height: 1.75;
+            letter-spacing: 0.01em;
+            font-weight: 400;
+        }
+
+        .dark .section-lede {
+            color: #a1a1aa;
         }
 
         /* Soft micro-interactions */
@@ -285,13 +436,16 @@
         }
 
         .skill-pill:hover {
-            border-color: rgb(5 150 105 / 0.45);
+            border-color: rgb(16 185 129 / 0.5);
             background-color: rgb(16 185 129 / 0.08);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+            transform: translateY(-1px);
         }
 
         .dark .skill-pill:hover {
             border-color: rgb(16 185 129 / 0.5);
             background-color: rgb(16 185 129 / 0.1);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
         }
 
         html {
@@ -324,7 +478,7 @@
             display: grid;
             grid-template-rows: 0fr;
             opacity: 0;
-            transition: grid-template-rows 0.35s ease, opacity 0.35s ease;
+            transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
         }
 
         .faq-panel.is-open {
@@ -334,45 +488,156 @@
 
         .faq-panel > div {
             overflow: hidden;
+            min-height: 0;
+        }
+
+        .faq-item {
+            transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgb(161 161 170 / 0.7);
+            background: rgb(255 255 255 / 0.78);
+        }
+
+        .dark .faq-item:hover {
+            border-color: rgb(63 63 70 / 1);
+            background: rgb(24 24 27 / 0.7);
+        }
+
+        .faq-item.is-active {
+            border-color: rgb(16 185 129 / 0.5) !important;
+            background: rgb(255 255 255 / 0.92) !important;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .dark .faq-item.is-active {
+            background: rgb(24 24 27 / 0.9) !important;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .faq-item.is-active .faq-question-text {
+            color: #059669;
+        }
+
+        .dark .faq-item.is-active .faq-question-text {
+            color: #34d399;
         }
 
         .nav-shell {
-            transition: box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+            transition: box-shadow 0.35s ease, border-color 0.35s ease, background-color 0.35s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(16, 185, 129, 0.08);
+        }
+
+        html:not(.dark) .nav-shell {
+            border-color: rgb(226 232 240 / 0.9);
+            border-top-color: rgb(16 185 129 / 0.35);
+            background: rgb(255 255 255 / 0.88);
+            box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.08);
         }
 
         .nav-shell.is-scrolled {
-            border-color: rgb(16 185 129 / 0.35);
-            box-shadow: 0 10px 40px -12px rgba(16, 185, 129, 0.25), 0 8px 24px rgba(0, 0, 0, 0.25);
+            border-color: rgb(16 185 129 / 0.4);
+            box-shadow: 0 20px 48px -12px rgba(16, 185, 129, 0.22), 0 12px 28px rgba(0, 0, 0, 0.35);
+        }
+
+        html:not(.dark) .nav-shell.is-scrolled {
+            box-shadow: 0 16px 36px -12px rgba(16, 185, 129, 0.18), 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         .nav-link {
             position: relative;
-            padding-bottom: 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.25;
+            white-space: nowrap;
+            color: #a1a1aa;
+            transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0;
-            height: 2px;
-            background: #34d399;
-            transition: width 0.3s ease;
+        html:not(.dark) .nav-link {
+            color: #71717a;
         }
 
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            width: 100%;
+        .nav-link:hover {
+            color: #f4f4f5;
+            background: rgb(39 39 42 / 0.5);
+        }
+
+        html:not(.dark) .nav-link:hover {
+            color: #18181b;
+            background: rgb(244 244 245 / 0.95);
         }
 
         .nav-link.active {
-            color: #059669;
+            color: #34d399;
             font-weight: 600;
+            background: rgb(16 185 129 / 0.1);
+            border-color: rgb(16 185 129 / 0.2);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
         }
 
-        .dark .nav-link.active {
-            color: #34d399;
+        html:not(.dark) .nav-link.active {
+            color: #059669;
+        }
+
+        .nav-link.active:hover {
+            color: #6ee7b7;
+            background: rgb(16 185 129 / 0.14);
+        }
+
+        html:not(.dark) .nav-link.active:hover {
+            color: #047857;
+        }
+
+        html:not(.dark) #main-nav .logo-text {
+            color: #18181b;
+        }
+
+        html:not(.dark) #main-nav .nav-util-btn {
+            border-color: rgb(203 213 225 / 0.95);
+            background: rgb(241 245 249 / 0.95);
+            color: #52525b;
+        }
+
+        html:not(.dark) #main-nav .nav-util-btn:hover {
+            border-color: rgb(16 185 129 / 0.4);
+            color: #059669;
+            background: rgb(255 255 255 / 0.95);
+        }
+
+        html:not(.dark) #main-nav .nav-brand-badge {
+            border-color: rgb(16 185 129 / 0.25);
+            background: rgb(16 185 129 / 0.08);
+            color: #059669;
+        }
+
+        .cmd-palette-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgb(63 63 70 / 0.55) transparent;
+        }
+
+        .cmd-palette-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cmd-palette-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .cmd-palette-scroll::-webkit-scrollbar-thumb {
+            background: rgb(63 63 70 / 0.55);
+            border-radius: 9999px;
+        }
+
+        .cmd-palette-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgb(82 82 91 / 0.75);
         }
 
         .logo-text {
@@ -503,6 +768,54 @@
             color: #3f3f46;
         }
 
+        .hero-mesh {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.45;
+            background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+            background-size: 22px 22px;
+            mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 20%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 20%, transparent 75%);
+        }
+
+        html:not(.dark) .hero-mesh {
+            opacity: 0.35;
+            background-image: radial-gradient(rgba(100, 116, 139, 0.22) 1px, transparent 1px);
+        }
+
+        .hero-term-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgb(63 63 70 / 0.8);
+            background: rgb(24 24 27 / 0.7);
+            padding: 0.3rem 0.55rem;
+            font-size: 10px;
+            font-weight: 500;
+            color: #a1a1aa;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .hero-term-btn:hover {
+            border-color: rgb(52 211 153 / 0.45);
+            color: #6ee7b7;
+        }
+
+        .hero-term-btn.is-active {
+            border-color: rgb(52 211 153 / 0.55);
+            background: rgb(16 185 129 / 0.12);
+            color: #6ee7b7;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .hero-term-body {
+            transition: opacity 0.2s ease;
+        }
+
         .hero-float-pill {
             position: absolute;
             z-index: 30;
@@ -523,8 +836,8 @@
             white-space: nowrap;
             user-select: none;
             pointer-events: auto;
-            cursor: default;
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
             will-change: transform;
         }
 
@@ -536,9 +849,15 @@
         }
 
         .hero-float-pill:hover {
-            transform: scale(1.05);
-            border-color: rgb(52 211 153 / 0.8);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            transform: scale(1.06);
+            border-color: rgb(52 211 153 / 0.85);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3), 0 0 36px rgba(16, 185, 129, 0.12);
+            background: rgb(16 185 129 / 0.12);
+        }
+
+        html:not(.dark) .hero-float-pill:hover {
+            background: rgb(16 185 129 / 0.08);
+            color: #047857;
         }
 
         @keyframes heroFloatA {
@@ -601,7 +920,7 @@
     </style>
 </head>
 <body
-    class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased"
+    class="bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100"
     x-data="{
         mobileOpen: false,
         moreOpen: false,
@@ -623,7 +942,7 @@
             { label: 'Tech Stack', href: '#skills', hint: 'Tools & skills', icon: 'layers' },
             { label: 'Database Schema', href: '#schema', hint: 'MySQL architecture', icon: 'database' },
             { label: 'API Terminal', href: '#api-terminal', hint: 'Live demo', icon: 'terminal' },
-            { label: 'Case Study', href: '#case-study', hint: 'Laravel + MySQL deep dive', icon: 'file-search' },
+            { label: 'Case Study', href: '#case-study', hint: 'Portfolio API & dynamic architecture', icon: 'file-search' },
             { label: 'Journey', href: '#journey', hint: 'Career path', icon: 'route' },
             { label: 'Services', href: '#services', hint: 'What I build', icon: 'briefcase' },
             { label: 'Activity', href: '#activity', hint: 'Code pulse', icon: 'activity' },
@@ -764,6 +1083,10 @@
         }
     "
 >
+    <div class="page-ambient" aria-hidden="true">
+        <div class="page-ambient__glow page-ambient__glow--violet"></div>
+    </div>
+    <div class="page-noise" aria-hidden="true"></div>
 
     @php
         $portfolioEmail = config('portfolio.email');
@@ -788,69 +1111,66 @@
         ];
 
         $moreLinks = [
-            ['label' => 'Strengths', 'href' => '#strengths'],
-            ['label' => 'Database Schema', 'href' => '#schema'],
-            ['label' => 'API Terminal', 'href' => '#api-terminal'],
-            ['label' => 'Case Study', 'href' => '#case-study'],
-            ['label' => 'Journey', 'href' => '#journey'],
-            ['label' => 'Activity', 'href' => '#activity'],
-            ['label' => 'FAQ', 'href' => '#faq'],
+            ['label' => 'Strengths', 'href' => '#strengths', 'icon' => 'shield', 'hint' => 'Core competencies'],
+            ['label' => 'Database Schema', 'href' => '#schema', 'icon' => 'database', 'hint' => 'MySQL architecture'],
+            ['label' => 'API Terminal', 'href' => '#api-terminal', 'icon' => 'terminal', 'hint' => 'Live demo'],
+            ['label' => 'Case Study', 'href' => '#case-study', 'icon' => 'briefcase', 'hint' => 'Featured project'],
+            ['label' => 'Journey', 'href' => '#journey', 'icon' => 'compass', 'hint' => 'Career timeline'],
+            ['label' => 'Activity', 'href' => '#activity', 'icon' => 'activity', 'hint' => 'Code pulse'],
+            ['label' => 'FAQ', 'href' => '#faq', 'icon' => 'circle-help', 'hint' => 'Common questions'],
         ];
 
         $schemaTables = [
-            'users' => [
-                'label' => 'users',
-                'model' => 'User',
-                'icon' => 'users',
+            'developers' => [
+                'label' => 'developers',
+                'model' => 'Developer',
+                'icon' => 'user-round',
                 'columns' => [
                     ['name' => 'id', 'type' => 'bigIncrements', 'attrs' => 'PK · auto'],
-                    ['name' => 'name', 'type' => 'string', 'attrs' => 'required'],
-                    ['name' => 'email', 'type' => 'string', 'attrs' => 'unique'],
-                    ['name' => 'password', 'type' => 'string', 'attrs' => 'hashed'],
-                    ['name' => 'email_verified_at', 'type' => 'timestamp', 'attrs' => 'nullable'],
-                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => ''],
+                    ['name' => 'full_name', 'type' => 'string', 'attrs' => 'required · John Bryan Bolarde'],
+                    ['name' => 'role', 'type' => 'string', 'attrs' => 'required · Full Stack / Laravel Specialist'],
+                    ['name' => 'status', 'type' => 'string', 'attrs' => 'indexed · Available for Hire'],
+                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => 'auto-generated / default: NOW()'],
                 ],
-                'indexes' => ['PRIMARY KEY (id)', 'UNIQUE INDEX users_email_unique (email)'],
+                'indexes' => ['PRIMARY KEY (id)', 'INDEX developers_status_index (status)'],
                 'relations' => [
-                    'hasMany(Order::class)',
-                    'hasMany(Product::class) // as seller',
+                    '$this->hasMany(Project::class)',
+                    '$this->belongsToMany(TechStack::class)',
                 ],
             ],
-            'orders' => [
-                'label' => 'orders',
-                'model' => 'Order',
-                'icon' => 'shopping-cart',
+            'projects' => [
+                'label' => 'projects',
+                'model' => 'Project',
+                'icon' => 'folder-kanban',
                 'columns' => [
                     ['name' => 'id', 'type' => 'bigIncrements', 'attrs' => 'PK · auto'],
-                    ['name' => 'user_id', 'type' => 'foreignId', 'attrs' => 'constrained'],
-                    ['name' => 'status', 'type' => 'string', 'attrs' => 'indexed'],
-                    ['name' => 'total', 'type' => 'decimal:10,2', 'attrs' => ''],
-                    ['name' => 'placed_at', 'type' => 'timestamp', 'attrs' => 'indexed'],
-                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => ''],
+                    ['name' => 'title', 'type' => 'string', 'attrs' => 'required'],
+                    ['name' => 'slug', 'type' => 'string', 'attrs' => 'unique · required'],
+                    ['name' => 'architecture', 'type' => 'string', 'attrs' => 'required · Laravel MVC + REST API'],
+                    ['name' => 'is_featured', 'type' => 'boolean', 'attrs' => 'indexed · default:false'],
+                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => 'auto-generated / default: NOW()'],
                 ],
-                'indexes' => ['PRIMARY KEY (id)', 'INDEX orders_user_id_index (user_id)', 'INDEX orders_status_index (status)'],
+                'indexes' => ['PRIMARY KEY (id)', 'UNIQUE INDEX projects_slug_unique (slug)', 'INDEX projects_is_featured_index (is_featured)'],
                 'relations' => [
-                    'belongsTo(User::class)',
-                    'belongsToMany(Product::class)',
+                    '$this->belongsTo(Developer::class)',
+                    '$this->belongsToMany(TechStack::class)',
                 ],
             ],
-            'products' => [
-                'label' => 'products',
-                'model' => 'Product',
-                'icon' => 'package',
+            'tech_stack' => [
+                'label' => 'tech_stack',
+                'model' => 'TechStack',
+                'icon' => 'layers',
                 'columns' => [
                     ['name' => 'id', 'type' => 'bigIncrements', 'attrs' => 'PK · auto'],
-                    ['name' => 'sku', 'type' => 'string', 'attrs' => 'unique'],
-                    ['name' => 'name', 'type' => 'string', 'attrs' => 'indexed'],
-                    ['name' => 'price', 'type' => 'decimal:10,2', 'attrs' => ''],
-                    ['name' => 'stock', 'type' => 'unsignedInteger', 'attrs' => 'default:0'],
-                    ['name' => 'user_id', 'type' => 'foreignId', 'attrs' => 'seller'],
-                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => ''],
+                    ['name' => 'name', 'type' => 'string', 'attrs' => 'required · Laravel, MySQL, JS'],
+                    ['name' => 'category', 'type' => 'string', 'attrs' => 'indexed · Backend / Database'],
+                    ['name' => 'proficiency', 'type' => 'integer', 'attrs' => 'required · 95%'],
+                    ['name' => 'created_at', 'type' => 'timestamps', 'attrs' => 'auto-generated / default: NOW()'],
                 ],
-                'indexes' => ['PRIMARY KEY (id)', 'UNIQUE INDEX products_sku_unique (sku)', 'INDEX products_name_index (name)'],
+                'indexes' => ['PRIMARY KEY (id)', 'INDEX tech_stack_category_index (category)'],
                 'relations' => [
-                    'belongsTo(User::class)',
-                    'belongsToMany(Order::class)',
+                    '$this->belongsTo(Developer::class)',
+                    '$this->belongsToMany(Project::class)',
                 ],
             ],
         ];
@@ -897,6 +1217,11 @@
                 'icon' => 'monitor-smartphone',
                 'title' => 'Modern Responsive Frontends',
                 'desc' => 'Crafting mobile-first, dynamic user interfaces using Tailwind CSS, JavaScript, and Blade templates.',
+            ],
+            [
+                'icon' => 'shield-check',
+                'title' => 'QA, Testing & Code Quality',
+                'desc' => 'Ensuring application reliability through automated testing (PHPUnit/Pest), API endpoint validation, edge-case debugging, and strict code quality standards.',
             ],
         ];
 
@@ -968,16 +1293,40 @@
 
         $faqItems = [
             [
+                'step' => '01',
+                'category' => 'Availability',
                 'question' => 'Are you available for full-time roles or freelance projects?',
-                'answer' => 'Yes! I am open to full-time Full Stack / Backend Developer opportunities as well as freelance project requests.',
+                'answer' => 'Yes. I am open to full-time Full Stack / Backend (Laravel) roles and selected freelance engagements. Share the stack, timeline, and goals — I will respond with fit, availability, and a clear next step.',
             ],
             [
-                'question' => 'What is your primary backend tech stack?',
-                'answer' => 'My core expertise lies in PHP and Laravel, paired with MySQL databases and XAMPP/local development setups, alongside Node.js for REST APIs.',
+                'step' => '02',
+                'category' => 'Tech Stack',
+                'question' => 'What is your primary tech stack and backend expertise?',
+                'answer' => 'My core stack is PHP and Laravel with MySQL, Blade, and Tailwind CSS, plus JavaScript/Alpine for polished UI interactions. On the backend I focus on MVC architecture, Form Requests, Eloquent modeling, authenticated REST APIs, and clean JSON contracts for SPA or mobile clients.',
             ],
             [
-                'question' => 'How do you ensure code quality and maintainability?',
-                'answer' => 'I follow clean code principles, MVC patterns, write clear documentation, and leverage version control (Git/GitHub) for easy collaboration and scalability.',
+                'step' => '03',
+                'category' => 'Database',
+                'question' => 'How do you handle database optimization and database architecture?',
+                'answer' => 'I design relational MySQL schemas with intentional foreign keys, unique constraints, and indexed lookup columns. I keep migrations production-minded, avoid N+1 query patterns with eager loading, and tune indexes for the real read/write paths of the application.',
+            ],
+            [
+                'step' => '04',
+                'category' => 'QA & Security',
+                'question' => 'How do you ensure code quality, automated testing, and security?',
+                'answer' => 'I ship maintainable Laravel code with clear layering, validation at the edge, and Git-based collaboration. Quality comes from PHPUnit/Pest-style testing habits, API endpoint validation, edge-case debugging, hashed credentials, CSRF/auth guards, and least-privilege data access patterns.',
+            ],
+            [
+                'step' => '05',
+                'category' => 'Process',
+                'question' => 'What is your turnaround time and collaboration style?',
+                'answer' => 'I prefer short feedback loops: clarify scope, ship incremental milestones, and communicate blockers early. Typical collaboration is async updates over chat/email plus scheduled check-ins, with demos against a staging URL so stakeholders can review working software — not just slides.',
+            ],
+            [
+                'step' => '06',
+                'category' => 'Deployment',
+                'question' => 'Can you handle deployment, hosting, and production readiness?',
+                'answer' => 'Yes. I prepare Laravel apps for production with environment config, secure APP_KEY handling, HTTPS-ready routing, Docker/Render-friendly deploy setups, and health checks. I document the runbook so your team can redeploy confidently after handoff.',
             ],
         ];
 
@@ -986,25 +1335,43 @@
                 'title' => 'Frontend',
                 'category' => 'frontend',
                 'icon' => 'layout',
-                'skills' => ['HTML5', 'CSS3', 'JavaScript', 'Blade Templates', 'Tailwind CSS'],
+                'skills' => [
+                    ['name' => 'HTML5', 'source' => 'simple', 'slug' => 'html5', 'color' => 'E34F26'],
+                    ['name' => 'CSS3', 'source' => 'simple', 'slug' => 'css', 'color' => '1572B6'],
+                    ['name' => 'JavaScript', 'source' => 'simple', 'slug' => 'javascript', 'color' => 'F7DF1E'],
+                    ['name' => 'Blade Templates', 'source' => 'simple', 'slug' => 'laravel', 'color' => 'FF2D20'],
+                    ['name' => 'Tailwind CSS', 'source' => 'simple', 'slug' => 'tailwindcss', 'color' => '06B6D4'],
+                ],
             ],
             [
                 'title' => 'Backend',
                 'category' => 'backend',
                 'icon' => 'server',
-                'skills' => ['PHP', 'Laravel', 'Node.js', 'RESTful APIs'],
+                'skills' => [
+                    ['name' => 'PHP', 'source' => 'simple', 'slug' => 'php', 'color' => '777BB4'],
+                    ['name' => 'Laravel', 'source' => 'simple', 'slug' => 'laravel', 'color' => 'FF2D20'],
+                    ['name' => 'Node.js', 'source' => 'simple', 'slug' => 'nodedotjs', 'color' => '5FA04E'],
+                    ['name' => 'RESTful APIs', 'source' => 'lucide', 'slug' => 'unplug'],
+                ],
             ],
             [
                 'title' => 'Database',
                 'category' => 'database',
                 'icon' => 'database',
-                'skills' => ['MySQL'],
+                'skills' => [
+                    ['name' => 'MySQL', 'source' => 'simple', 'slug' => 'mysql', 'color' => '4479A1'],
+                ],
             ],
             [
                 'title' => 'Tools & Ecosystem',
                 'category' => 'tools',
                 'icon' => 'wrench',
-                'skills' => ['Git', 'GitHub', 'Postman', 'XAMPP'],
+                'skills' => [
+                    ['name' => 'Git', 'source' => 'simple', 'slug' => 'git', 'color' => 'F05032'],
+                    ['name' => 'GitHub', 'source' => 'simple', 'slug' => 'github', 'color' => 'E6EDF3'],
+                    ['name' => 'Postman', 'source' => 'simple', 'slug' => 'postman', 'color' => 'FF6C37'],
+                    ['name' => 'XAMPP', 'source' => 'lucide', 'slug' => 'server'],
+                ],
             ],
         ];
 
@@ -1107,32 +1474,32 @@
     </div>
 
     {{-- ===================== NAVIGATION ===================== --}}
-    <header class="pointer-events-none sticky top-0 z-50 px-3 pt-3 sm:px-4">
+    <header class="pointer-events-none fixed inset-x-0 top-0 z-50">
         <nav
             id="main-nav"
-            class="nav-shell pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border border-slate-200/80 bg-white/75 px-4 py-2.5 shadow-lg shadow-black/5 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:shadow-black/20 sm:px-6 sm:py-3"
+            class="nav-shell pointer-events-auto absolute left-1/2 top-4 z-50 flex w-[92%] max-w-6xl -translate-x-1/2 items-center justify-between gap-3 rounded-full border border-zinc-800/80 border-t-emerald-500/30 bg-zinc-900/80 px-4 py-3 shadow-2xl backdrop-blur-xl transition-all duration-300 dark:border-zinc-800/80 dark:border-t-emerald-500/30 dark:bg-zinc-900/80 sm:px-6"
         >
             {{-- Logo --}}
             <a href="#hero" class="group flex shrink-0 items-center gap-2.5">
-                <span class="relative flex h-2.5 w-2.5 shrink-0">
+                <span class="relative flex h-2.5 w-2.5 shrink-0" title="Available">
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.7)]"></span>
                 </span>
-                <span class="logo-text text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-lg">
+                <span class="logo-text text-base font-bold tracking-tight text-zinc-100 sm:text-lg">
                     John Bryan
                 </span>
-                <span class="hidden shrink-0 rounded-md border border-slate-300 dark:border-zinc-700 bg-slate-100/80 dark:bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] leading-none text-emerald-600 dark:text-emerald-400 md:inline-flex md:items-center">
+                <span class="nav-brand-badge hidden shrink-0 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-xs leading-none text-emerald-400 md:inline-flex md:items-center">
                     &lt;/&gt;
                 </span>
             </a>
 
             {{-- Desktop Nav --}}
-            <ul class="hidden items-center gap-5 lg:flex xl:gap-6">
+            <ul class="hidden items-center gap-0.5 lg:flex xl:gap-1">
                 @foreach ($navLinks as $link)
                     <li>
                         <a href="{{ $link['href'] }}"
                            data-nav-link
-                           class="nav-link whitespace-nowrap text-sm font-medium text-zinc-600 transition-colors duration-300 hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">
+                           class="nav-link">
                             {{ $link['label'] }}
                         </a>
                     </li>
@@ -1140,32 +1507,51 @@
                 <li class="relative" @click.outside="moreOpen = false">
                     <button
                         type="button"
-                        class="nav-link inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-zinc-600 transition-colors duration-300 hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400"
+                        class="nav-link"
                         @click="moreOpen = !moreOpen; $nextTick(() => window.initLucideIcons && window.initLucideIcons())"
                         :aria-expanded="moreOpen.toString()"
+                        :class="moreOpen && 'active'"
                     >
                         More
-                        <i data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-300" :class="moreOpen && 'rotate-180'"></i>
+                        <span
+                            class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-transform duration-300 ease-out"
+                            :class="moreOpen ? 'rotate-180 text-emerald-400' : 'rotate-0 text-zinc-400'"
+                        >
+                            <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
+                        </span>
                     </button>
                     <div
                         x-show="moreOpen"
                         x-cloak
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                        x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-                        class="absolute right-0 top-full z-50 mt-3 min-w-[11rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur-md dark:border-zinc-700/80 dark:bg-zinc-900/95 dark:shadow-black/40"
+                        x-transition:enter="transition ease-out duration-200 transform"
+                        x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150 transform"
+                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                        class="absolute right-0 top-full z-50 mt-3 w-64 overflow-hidden rounded-2xl border border-zinc-800/80 border-t border-t-emerald-500/30 bg-zinc-900/90 p-2 shadow-2xl backdrop-blur-xl"
+                        style="box-shadow: 0 25px 50px -12px rgba(0,0,0,0.55), 0 -1px 0 0 rgba(16,185,129,0.25);"
                     >
-                        @foreach ($moreLinks as $link)
-                            <a href="{{ $link['href'] }}"
-                               data-nav-link
-                               @click="moreOpen = false"
-                               class="block rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400">
-                                {{ $link['label'] }}
-                            </a>
-                        @endforeach
+                        <div class="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-emerald-500/10 to-transparent" aria-hidden="true"></div>
+                        <ul class="relative space-y-0.5">
+                            @foreach ($moreLinks as $link)
+                                <li>
+                                    <a href="{{ $link['href'] }}"
+                                       data-nav-link
+                                       @click="moreOpen = false"
+                                       class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-zinc-300 transition-all duration-200 hover:bg-zinc-800/80 hover:text-emerald-400">
+                                        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-700/70 bg-zinc-950/60 text-zinc-400 transition-all duration-200 group-hover:border-emerald-500/40 group-hover:bg-emerald-500/10 group-hover:text-emerald-400">
+                                            <i data-lucide="{{ $link['icon'] }}" class="h-3.5 w-3.5"></i>
+                                        </span>
+                                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                            <span class="truncate text-[13px] font-semibold leading-none">{{ $link['label'] }}</span>
+                                            <span class="truncate text-[10px] font-normal text-zinc-500 transition-colors duration-200 group-hover:text-zinc-400">{{ $link['hint'] }}</span>
+                                        </span>
+                                        <i data-lucide="chevron-right" class="h-3.5 w-3.5 shrink-0 text-zinc-600 opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-emerald-400 group-hover:opacity-100"></i>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </li>
             </ul>
@@ -1174,20 +1560,20 @@
             <div class="flex items-center gap-2">
                 <button
                     type="button"
-                    class="hidden items-center gap-1.5 rounded-full border border-slate-300/80 bg-white/70 px-2.5 py-1.5 text-[11px] font-medium text-zinc-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-600 dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:text-emerald-400 xl:inline-flex"
+                    class="nav-util-btn hidden cursor-pointer items-center gap-2 rounded-full border border-zinc-700/60 bg-zinc-800/60 px-3 py-1.5 text-xs text-zinc-400 transition-all duration-200 hover:border-emerald-500/40 hover:text-zinc-200 xl:inline-flex"
                     @click="openCmd()"
                     title="Open command palette"
                 >
-                    <i data-lucide="command" class="h-3.5 w-3.5"></i>
-                    <span>Press</span>
-                    <kbd class="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">Ctrl</kbd>
-                    <span>+</span>
-                    <kbd class="rounded border border-slate-300 bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">K</kbd>
+                    <i data-lucide="command" class="h-3.5 w-3.5 shrink-0"></i>
+                    <span class="hidden 2xl:inline">Press</span>
+                    <kbd class="rounded border border-zinc-600/80 bg-zinc-900/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Ctrl</kbd>
+                    <span class="text-zinc-600">+</span>
+                    <kbd class="rounded border border-zinc-600/80 bg-zinc-900/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">K</kbd>
                     <span class="hidden 2xl:inline">to navigate</span>
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/80 bg-white/70 text-zinc-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/50 hover:text-emerald-600 dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:text-emerald-400 xl:hidden"
+                    class="nav-util-btn inline-flex cursor-pointer items-center justify-center rounded-full border border-zinc-700/60 bg-zinc-800/80 p-2 text-zinc-300 transition-all duration-200 hover:border-emerald-500/40 hover:bg-zinc-800 hover:text-emerald-400 xl:hidden"
                     @click="openCmd()"
                     aria-label="Open command palette"
                     title="Ctrl + K"
@@ -1197,22 +1583,22 @@
                 <button
                     type="button"
                     id="theme-toggle"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/80 bg-white/70 text-zinc-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:rotate-12 hover:border-emerald-500/50 hover:text-emerald-600 hover:shadow-[0_0_18px_rgba(16,185,129,0.35)] dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:text-emerald-400"
+                    class="nav-util-btn inline-flex cursor-pointer items-center justify-center rounded-full border border-zinc-700/60 bg-zinc-800/80 p-2 text-zinc-300 transition-all duration-200 hover:border-emerald-500/40 hover:bg-zinc-800 hover:text-emerald-400"
                     aria-label="Toggle dark mode"
                     title="Toggle theme"
                 >
-                    <i id="theme-icon-sun" data-lucide="sun" class="hidden h-5 w-5"></i>
-                    <i id="theme-icon-moon" data-lucide="moon" class="h-5 w-5"></i>
+                    <i id="theme-icon-sun" data-lucide="sun" class="hidden h-4 w-4"></i>
+                    <i id="theme-icon-moon" data-lucide="moon" class="h-4 w-4"></i>
                 </button>
                 <button
                     type="button"
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/80 bg-white/70 text-zinc-700 backdrop-blur-sm transition hover:border-emerald-500/50 hover:text-emerald-600 dark:border-zinc-700/80 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:text-emerald-400 lg:hidden"
+                    class="nav-util-btn inline-flex cursor-pointer items-center justify-center rounded-full border border-zinc-700/60 bg-zinc-800/80 p-2 text-zinc-300 transition-all duration-200 hover:border-emerald-500/40 hover:bg-zinc-800 hover:text-emerald-400 lg:hidden"
                     @click="mobileOpen = !mobileOpen; moreOpen = false; $nextTick(() => window.initLucideIcons && window.initLucideIcons())"
                     :aria-expanded="mobileOpen.toString()"
                     aria-label="Toggle menu"
                 >
-                    <i x-show="!mobileOpen" data-lucide="menu" class="h-5 w-5"></i>
-                    <i x-show="mobileOpen" x-cloak data-lucide="x" class="h-5 w-5"></i>
+                    <i x-show="!mobileOpen" data-lucide="menu" class="h-4 w-4"></i>
+                    <i x-show="mobileOpen" x-cloak data-lucide="x" class="h-4 w-4"></i>
                 </button>
             </div>
         </nav>
@@ -1259,11 +1645,11 @@
                 <div class="flex-1 overflow-y-auto px-3 py-4">
                     <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Primary</p>
                     <ul class="mb-5 space-y-1">
-                        @foreach ($navLinks as $link)
-                            <li>
-                                <a href="{{ $link['href'] }}"
+                @foreach ($navLinks as $link)
+                    <li>
+                        <a href="{{ $link['href'] }}"
                                    data-nav-link
-                                   @click="mobileOpen = false"
+                           @click="mobileOpen = false"
                                    class="nav-link block rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400">
                                     {{ $link['label'] }}
                                 </a>
@@ -1277,8 +1663,14 @@
                                 <a href="{{ $link['href'] }}"
                                    data-nav-link
                                    @click="mobileOpen = false"
-                                   class="nav-link block rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400">
-                                    {{ $link['label'] }}
+                                   class="nav-link group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400">
+                                    <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-zinc-500 transition-all duration-200 group-hover:border-emerald-500/40 group-hover:text-emerald-500 dark:border-zinc-700/70 dark:bg-zinc-950/60 dark:text-zinc-400 dark:group-hover:text-emerald-400">
+                                        <i data-lucide="{{ $link['icon'] }}" class="h-3.5 w-3.5"></i>
+                                    </span>
+                                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                        <span class="leading-none">{{ $link['label'] }}</span>
+                                        <span class="text-[10px] font-normal text-zinc-500">{{ $link['hint'] }}</span>
+                                    </span>
                                 </a>
                             </li>
                         @endforeach
@@ -1290,32 +1682,52 @@
 
     <main>
         {{-- ===================== HERO ===================== --}}
-        <section id="hero" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center overflow-hidden">
-            {{-- Ambient glow --}}
-            <div class="pointer-events-none absolute -left-32 top-10 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl ambient-glow"></div>
-            <div class="pointer-events-none absolute -right-24 bottom-8 h-96 w-96 rounded-full bg-violet-500/15 blur-3xl ambient-glow-delay"></div>
+        <section id="hero" class="section-screen relative flex scroll-mt-24 snap-start flex-col overflow-hidden">
+            {{-- Mesh depth + soft side glow --}}
+            <div class="hero-mesh" aria-hidden="true"></div>
+            <div class="pointer-events-none absolute -right-24 bottom-8 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl ambient-glow-delay"></div>
 
-            <div class="relative mx-auto w-full max-w-7xl px-6 py-12 md:py-20">
-                <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+            <div class="relative z-[1] mx-auto w-full max-w-[1400px] px-6 pb-12 pt-4 md:px-12 md:pb-14 md:pt-6 lg:pt-8">
+                <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
                     {{-- Left: bio / code / CTAs (7 cols) --}}
-                    <div class="order-2 flex flex-col items-start lg:order-1 lg:col-span-7">
-                        {{-- Status badges --}}
-                        <div class="mb-7 flex flex-wrap items-center gap-2.5 animate-fade-in">
-                            <div class="hero-status-pill">
-                                <span class="relative flex h-2 w-2">
-                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70"></span>
-                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-                                </span>
-                                <span>Open for opportunities</span>
-                            </div>
-                            <div class="hero-status-pill">
-                                <span>📍</span>
-                                <span>Based in Philippines (PST / UTC+8)</span>
-                            </div>
-                            <div class="hero-status-pill">
-                                <i data-lucide="clock" class="h-3.5 w-3.5 text-emerald-400"></i>
-                                <span>Philippine Time: <span id="ph-clock">--:-- --</span></span>
-                            </div>
+                    <div class="order-2 flex w-full flex-col items-start lg:order-1 lg:col-span-7">
+                        {{-- Live Manila clock + availability --}}
+                        <div
+                            class="hero-status-pill mb-4 animate-fade-in"
+                            style="animation-delay: 0.05s"
+                            x-data="{
+                                date: '',
+                                time: '',
+                                tick() {
+                                    const now = new Date();
+                                    this.date = now.toLocaleDateString('en-PH', {
+                                        timeZone: 'Asia/Manila',
+                                        weekday: 'short',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                    });
+                                    this.time = now.toLocaleTimeString('en-PH', {
+                                        timeZone: 'Asia/Manila',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: true,
+                                    });
+                                }
+                            }"
+                            x-init="tick(); setInterval(() => tick(), 1000)"
+                        >
+                            <span class="relative flex h-2 w-2 shrink-0">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                            </span>
+                            <span class="tabular-nums text-[11px] text-zinc-400 sm:text-xs" x-text="date || '—'"></span>
+                            <span class="text-zinc-500 dark:text-zinc-600" aria-hidden="true">·</span>
+                            <span class="tabular-nums text-emerald-600 dark:text-emerald-400" x-text="time || '—:—:—'"></span>
+                            <span class="text-zinc-500 dark:text-zinc-600" aria-hidden="true">·</span>
+                            <span class="text-[11px] sm:text-xs">Available for Full-Time &amp; Client Projects</span>
+                            <span class="hidden rounded-md border border-zinc-700/60 bg-zinc-950/50 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 sm:inline dark:border-zinc-700/80">PST / Manila</span>
                         </div>
 
                         <h1 class="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl animate-fade-in" style="animation-delay: 0.1s">
@@ -1331,35 +1743,63 @@
                             Building scalable, responsive, and user-focused web applications from front to back — with Laravel architecture, clean APIs, and polished UI craft.
                         </p>
 
-                        {{-- Mini IDE code preview --}}
+                        {{-- Interactive terminal utility --}}
                         <div
-                            class="hero-code-card mb-2 w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/95 font-mono text-xs backdrop-blur-md animate-fade-in"
+                            class="hero-code-card mb-2 w-full max-w-2xl overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/95 font-mono text-xs backdrop-blur-md animate-fade-in lg:max-w-none"
                             style="animation-delay: 0.35s"
                             x-data="{
+                                cmd: 'session',
+                                execMs: '1.2',
+                                fading: false,
                                 copiedCode: false,
-                                async copySnippet() {
-                                    const text = [
+                                snippets: {
+                                    session: [
                                         'const developer = {',
                                         '  name: \'John Bryan\',',
                                         '  stack: [\'Laravel\', \'JS\', \'MySQL\'],',
                                         '  status: \'available\'',
                                         '};',
-                                    ].join('\n');
+                                    ].join('\\n'),
+                                    profile: [
+                                        '{',
+                                        '  role: \'Senior Full Stack Developer\',',
+                                        '  focus: [\'Laravel 11\', \'REST APIs\', \'MySQL\'],',
+                                        '  location: \'Philippines (PST)\',',
+                                        '  open_to: \'full-time & client work\'',
+                                        '}',
+                                    ].join('\\n'),
+                                    artisan: [
+                                        'INFO  Application status.',
+                                        '',
+                                        '  Environment ............... production',
+                                        '  PHP ....................... 8.3.x',
+                                        '  Laravel ................... 11.x',
+                                        '  Queue ..................... ready',
+                                        '  Availability .............. hireable',
+                                    ].join('\\n'),
+                                },
+                                run(next) {
+                                    if (this.cmd === next) return;
+                                    this.fading = true;
+                                    setTimeout(() => {
+                                        this.cmd = next;
+                                        this.execMs = (0.8 + Math.random() * 1.4).toFixed(1);
+                                        this.fading = false;
+                                    }, 140);
+                                },
+                                async copySnippet() {
+                                    const text = this.snippets[this.cmd] || this.snippets.session;
                                     try {
                                         await navigator.clipboard.writeText(text);
                                         this.copiedCode = true;
-                                        this.$nextTick(() => window.initLucideIcons && window.initLucideIcons());
-                                        setTimeout(() => {
-                                            this.copiedCode = false;
-                                            this.$nextTick(() => window.initLucideIcons && window.initLucideIcons());
-                                        }, 2000);
+                                        setTimeout(() => { this.copiedCode = false; }, 2000);
                                     } catch (e) {
                                         console.error('Copy failed', e);
                                     }
                                 }
                             }"
                         >
-                            <div class="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/90 px-4 py-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 bg-zinc-900/90 px-4 py-3">
                                 <div class="flex min-w-0 items-center gap-3">
                                     <div class="flex gap-1.5">
                                         <span class="h-2.5 w-2.5 rounded-full bg-red-500/80"></span>
@@ -1368,42 +1808,85 @@
                                     </div>
                                     <span class="inline-flex items-center gap-1.5 truncate text-[11px] text-zinc-400">
                                         <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]"></span>
-                                        active_session.json
+                                        <span x-text="cmd === 'artisan' ? 'artisan status' : (cmd === 'profile' ? 'profile.json' : 'active_session.json')"></span>
                                     </span>
                                 </div>
-                                <button
-                                    type="button"
-                                    class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-zinc-700/80 bg-zinc-950/70 px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-300"
-                                    @click="copySnippet()"
-                                    :class="copiedCode && 'border-emerald-500/50 text-emerald-300'"
-                                >
-                                    <svg x-show="!copiedCode" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                                    <svg x-show="copiedCode" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                    <span x-text="copiedCode ? 'Copied!' : 'Copy'"></span>
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="inline-flex items-center rounded-md border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400"
+                                        x-show="execMs"
+                                        x-transition.opacity
+                                    >
+                                        Execution Time: <span class="ml-1 tabular-nums" x-text="execMs + 'ms'"></span>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-zinc-700/80 bg-zinc-950/70 px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-300"
+                                        @click="copySnippet()"
+                                        :class="copiedCode && 'border-emerald-500/50 text-emerald-300'"
+                                    >
+                                        <svg x-show="!copiedCode" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                        <svg x-show="copiedCode" x-cloak xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                        <span x-text="copiedCode ? 'Copied!' : 'Copy'"></span>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="space-y-1 p-5 text-[13px] leading-relaxed sm:text-sm">
-                                <p>
-                                    <span class="text-violet-400">const</span>
-                                    <span class="font-semibold text-zinc-100"> developer </span>
-                                    <span class="text-zinc-400">=</span>
-                                    <span class="text-zinc-400"> {</span>
-                                </p>
-                                <p class="pl-5">
-                                    <span class="text-violet-300">name</span><span class="text-zinc-400">:</span>
-                                    <span class="text-emerald-400"> "John Bryan"</span><span class="text-zinc-400">,</span>
-                                </p>
-                                <p class="pl-5">
-                                    <span class="text-violet-300">stack</span><span class="text-zinc-400">:</span>
-                                    <span class="text-zinc-400"> [</span><span class="text-emerald-400">"Laravel"</span><span class="text-zinc-400">,</span>
-                                    <span class="text-emerald-400"> "JS"</span><span class="text-zinc-400">,</span>
-                                    <span class="text-emerald-400"> "MySQL"</span><span class="text-zinc-400">],</span>
-                                </p>
-                                <p class="pl-5">
-                                    <span class="text-violet-300">status</span><span class="text-zinc-400">:</span>
-                                    <span class="text-emerald-400"> "available"</span>
-                                </p>
-                                <p><span class="text-zinc-400">};</span></p>
+
+                            {{-- Command tabs --}}
+                            <div class="flex flex-wrap gap-1.5 border-b border-zinc-800/60 bg-zinc-950/60 px-3 py-2">
+                                <button type="button" class="hero-term-btn" :class="cmd === 'session' && 'is-active'" @click="run('session')">[active_session.json]</button>
+                                <button type="button" class="hero-term-btn" :class="cmd === 'profile' && 'is-active'" @click="run('profile')">[cat profile.json]</button>
+                                <button type="button" class="hero-term-btn" :class="cmd === 'artisan' && 'is-active'" @click="run('artisan')">[php artisan status]</button>
+                            </div>
+
+                            <div class="hero-term-body min-h-[9.5rem] space-y-1 p-5 text-[13px] leading-relaxed sm:text-sm" :class="fading && 'opacity-40'">
+                                <template x-if="cmd === 'session'">
+                                    <div class="space-y-1">
+                                        <p>
+                                            <span class="text-violet-400">const</span>
+                                            <span class="font-semibold text-zinc-100"> developer </span>
+                                            <span class="text-zinc-400">=</span>
+                                            <span class="text-zinc-400"> {</span>
+                                        </p>
+                                        <p class="pl-5">
+                                            <span class="text-violet-300">name</span><span class="text-zinc-400">:</span>
+                                            <span class="text-emerald-400"> "John Bryan"</span><span class="text-zinc-400">,</span>
+                                        </p>
+                                        <p class="pl-5">
+                                            <span class="text-violet-300">stack</span><span class="text-zinc-400">:</span>
+                                            <span class="text-zinc-400"> [</span><span class="text-emerald-400">"Laravel"</span><span class="text-zinc-400">,</span>
+                                            <span class="text-emerald-400"> "JS"</span><span class="text-zinc-400">,</span>
+                                            <span class="text-emerald-400"> "MySQL"</span><span class="text-zinc-400">],</span>
+                                        </p>
+                                        <p class="pl-5">
+                                            <span class="text-violet-300">status</span><span class="text-zinc-400">:</span>
+                                            <span class="text-emerald-400"> "available"</span>
+                                        </p>
+                                        <p><span class="text-zinc-400">};</span></p>
+                                    </div>
+                                </template>
+                                <template x-if="cmd === 'profile'">
+                                    <div class="space-y-1">
+                                        <p><span class="text-zinc-500">$</span> <span class="text-emerald-400">cat</span> <span class="text-zinc-300">profile.json</span></p>
+                                        <p><span class="text-zinc-400">{</span></p>
+                                        <p class="pl-5"><span class="text-violet-300">"role"</span><span class="text-zinc-400">:</span> <span class="text-emerald-400">"Senior Full Stack Developer"</span><span class="text-zinc-400">,</span></p>
+                                        <p class="pl-5"><span class="text-violet-300">"focus"</span><span class="text-zinc-400">:</span> <span class="text-zinc-400">[</span><span class="text-emerald-400">"Laravel 11"</span><span class="text-zinc-400">,</span> <span class="text-emerald-400">"REST APIs"</span><span class="text-zinc-400">,</span> <span class="text-emerald-400">"MySQL"</span><span class="text-zinc-400">],</span></p>
+                                        <p class="pl-5"><span class="text-violet-300">"location"</span><span class="text-zinc-400">:</span> <span class="text-emerald-400">"Philippines (PST)"</span><span class="text-zinc-400">,</span></p>
+                                        <p class="pl-5"><span class="text-violet-300">"open_to"</span><span class="text-zinc-400">:</span> <span class="text-emerald-400">"full-time &amp; client work"</span></p>
+                                        <p><span class="text-zinc-400">}</span></p>
+                                    </div>
+                                </template>
+                                <template x-if="cmd === 'artisan'">
+                                    <div class="space-y-1">
+                                        <p><span class="text-zinc-500">$</span> <span class="text-emerald-400">php artisan</span> <span class="text-zinc-300">status</span></p>
+                                        <p class="pt-1 text-emerald-400/90">INFO  Application status.</p>
+                                        <p class="text-zinc-400">  Environment ............... <span class="text-zinc-200">production</span></p>
+                                        <p class="text-zinc-400">  PHP ....................... <span class="text-zinc-200">8.3.x</span></p>
+                                        <p class="text-zinc-400">  Laravel ................... <span class="text-zinc-200">11.x</span></p>
+                                        <p class="text-zinc-400">  Queue ..................... <span class="text-emerald-400">ready</span></p>
+                                        <p class="text-zinc-400">  Availability .............. <span class="text-emerald-400">hireable</span></p>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -1412,13 +1895,13 @@
                             <a href="#skills"
                                class="glow-emerald inline-flex h-12 w-auto shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-zinc-950 shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:bg-emerald-400">
                                 <i data-lucide="folders" class="h-4 w-4 shrink-0"></i>
-                                View Projects
-                            </a>
-                            <a href="#contact"
+                        View Projects
+                    </a>
+                    <a href="#contact"
                                class="inline-flex h-12 w-auto shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-zinc-700/80 bg-zinc-900/60 px-5 py-3 text-sm font-semibold text-zinc-200 backdrop-blur-md transition-all duration-300 hover:border-violet-500 hover:text-violet-400">
                                 <i data-lucide="mail" class="h-4 w-4 shrink-0"></i>
-                                Contact Me
-                            </a>
+                        Contact Me
+                    </a>
                             <button
                                 type="button"
                                 @click="openResume()"
@@ -1428,10 +1911,26 @@
                                 Download Resume / CV
                             </button>
                         </div>
+
+                        {{-- Engineering metrics strip --}}
+                        <div class="mt-6 grid w-full grid-cols-1 gap-3 border-t border-slate-200/80 pt-6 animate-fade-in dark:border-zinc-800/60 sm:grid-cols-3" style="animation-delay: 0.5s">
+                            <div class="flex items-center justify-center gap-2.5 rounded-xl border border-slate-200/80 bg-white/70 px-4 py-2.5 text-center text-xs font-semibold text-zinc-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-600 dark:border-zinc-800/80 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400">
+                                <span class="shrink-0" aria-hidden="true">💻</span>
+                                <span class="leading-snug">Full Stack &amp; Database Architecture</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2.5 rounded-xl border border-slate-200/80 bg-white/70 px-4 py-2.5 text-center text-xs font-semibold text-zinc-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-600 dark:border-zinc-800/80 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400">
+                                <span class="shrink-0" aria-hidden="true">⚡</span>
+                                <span class="leading-snug">REST API &amp; Microservices Design</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2.5 rounded-xl border border-slate-200/80 bg-white/70 px-4 py-2.5 text-center text-xs font-semibold text-zinc-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-600 dark:border-zinc-800/80 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:text-emerald-400">
+                                <span class="shrink-0" aria-hidden="true">🛡️</span>
+                                <span class="leading-snug">Automated QA &amp; PHPUnit Testing</span>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Right: transparent portrait + ambient glow (5 cols) --}}
-                    <div class="hero-photo-stage relative order-1 mx-auto flex w-full max-w-md flex-col items-center lg:order-2 lg:col-span-5 lg:max-w-none animate-fade-in" style="animation-delay: 0.25s">
+                    <div class="hero-photo-stage relative order-1 mx-auto flex w-full max-w-md flex-col items-center lg:order-2 lg:col-span-5 lg:max-w-none lg:justify-self-stretch animate-fade-in" style="animation-delay: 0.25s">
                         {{-- Multi-layer glowing aura --}}
                         <div class="hero-aura pointer-events-none absolute left-1/2 top-[42%] -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-emerald-500/25 via-violet-500/20 to-transparent blur-3xl sm:h-80 sm:w-80"></div>
                         <div class="hero-aura-delay pointer-events-none absolute left-[18%] top-[28%] -z-10 h-56 w-56 rounded-full bg-emerald-500/30 blur-3xl"></div>
@@ -1447,10 +1946,10 @@
                         <span class="hero-deco-mark left-[4%] top-[55%] animate-float text-xs tracking-wider text-emerald-300/80">=&gt;</span>
                         <span class="hero-deco-mark right-[6%] top-[58%] animate-float-slow text-[11px] tracking-widest text-violet-300/80">DB::</span>
 
-                        {{-- Floating glass pills (staggered float + hover) --}}
-                        <span class="hero-float-pill pill-a left-0 top-4 sm:-left-2 sm:top-6">⚡ Laravel 11 Specialist</span>
-                        <span class="hero-float-pill pill-b right-0 top-14 sm:-right-1 sm:top-12">🟢 Available for Hire</span>
-                        <span class="hero-float-pill pill-c right-2 bottom-24 sm:right-0 sm:bottom-28">🛠️ REST API &amp; MySQL</span>
+                        {{-- Floating glass pills (staggered float + hover glow) --}}
+                        <span class="hero-float-pill pill-a left-0 top-4 cursor-pointer transition-all duration-300 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] sm:-left-2 sm:top-6" title="Laravel 11 Specialist">⚡ Laravel 11 Specialist</span>
+                        <span class="hero-float-pill pill-b right-0 top-14 cursor-pointer transition-all duration-300 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] sm:-right-1 sm:top-12" title="Available for Hire">🟢 Available for Hire</span>
+                        <span class="hero-float-pill pill-c right-2 bottom-24 cursor-pointer transition-all duration-300 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] sm:right-0 sm:bottom-28" title="REST API &amp; MySQL">🛠️ REST API &amp; MySQL</span>
 
                         <div class="hero-photo-frame relative w-full bg-transparent">
                             <img
@@ -1484,21 +1983,21 @@
 
         {{-- ===================== ABOUT ===================== --}}
         <section id="about" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Who I Am</span>
                     <h2 class="section-title mb-6 text-3xl font-bold tracking-tight sm:text-4xl">
-                        About Me
+                        About <span class="section-title-accent">Me</span>
                     </h2>
-                    <p class="text-base leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Hi! I'm John Bryan, a 25-year-old Full Stack Developer with a passion for turning complex problems into clean, efficient code. I specialize in building complete web solutions—from designing intuitive user interfaces to architecting robust backend APIs and databases. Constant learning drives my development journey, and I'm always eager to explore new technologies to build better web experiences.
                     </p>
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-8">
                     @foreach ($aboutCards as $index => $card)
                         <article
-                            class="interactive-card glass-card group rounded-xl p-6"
+                            class="interactive-card glass-card group h-full w-full rounded-xl p-6"
                             data-aos="fade-up"
                             data-aos-delay="{{ ($index + 1) * 100 }}"
                         >
@@ -1515,29 +2014,29 @@
 
         {{-- ===================== STRENGTHS ===================== --}}
         <section id="strengths" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute left-0 top-10 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute left-0 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Core Competencies</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        What I Bring to the Table
+                        What I Bring to the <span class="section-title-accent">Table</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         My core technical identity — the strengths I bring to every project I build.
                     </p>
                 </div>
 
-                <div class="grid gap-4 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     @foreach ($strengthCards as $index => $card)
                         <article
-                            class="interactive-card glass-card group rounded-xl p-6"
+                            class="interactive-card group relative h-full w-full rounded-2xl border border-slate-200/80 bg-white/50 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:hover:border-emerald-500/40"
                             data-aos="fade-up"
                             data-aos-delay="{{ ($index + 1) * 100 }}"
                         >
                             <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br from-emerald-500/10 to-violet-500/10 blur-2xl transition duration-300 group-hover:from-emerald-500/20 group-hover:to-violet-500/20"></div>
                             <div class="relative z-[1]">
-                                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400 transition-all duration-300 group-hover:text-violet-300">
+                                <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 transition-all duration-300 group-hover:text-violet-300 dark:text-emerald-400">
                                     <i data-lucide="{{ $card['icon'] }}" class="h-6 w-6"></i>
                                 </div>
                                 <h3 class="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $card['title'] }}</h3>
@@ -1569,15 +2068,15 @@
                 }
             }"
         >
-            <div class="pointer-events-none absolute right-0 top-20 h-64 w-64 rounded-full bg-violet-500/5 blur-3xl ambient-glow-delay"></div>
+            <div class="pointer-events-none absolute right-0 top-20 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl opacity-80 ambient-glow-delay"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Toolkit</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Tech Stack
+                        Tech <span class="section-title-accent">Stack</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Technologies I use to design, build, and ship production-ready web applications.
                     </p>
                 </div>
@@ -1600,7 +2099,7 @@
                     @endforeach
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid auto-rows-fr grid-cols-1 items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4 lg:gap-8">
                     @foreach ($skillGroups as $index => $group)
                         <div
                             x-show="matches('{{ $group['category'] }}')"
@@ -1610,21 +2109,32 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-[0.98]"
-                            class="interactive-card glass-card rounded-xl p-6"
+                            class="interactive-card glass-card flex h-full w-full flex-col rounded-xl p-6"
                             data-aos="fade-up"
                             data-aos-delay="{{ ($index + 1) * 100 }}"
                             data-skill-category="{{ $group['category'] }}"
                         >
-                            <div class="mb-5 flex items-center gap-3">
-                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
+                            <div class="flex items-center gap-3">
+                                <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
                                     <i data-lucide="{{ $group['icon'] }}" class="h-5 w-5"></i>
                                 </div>
-                                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ $group['title'] }}</h3>
+                                <h3 class="text-lg font-semibold leading-none text-zinc-900 dark:text-zinc-100">{{ $group['title'] }}</h3>
                             </div>
-                            <div class="flex flex-wrap gap-2">
+                            <div class="mt-4 flex flex-wrap items-center gap-2.5">
                                 @foreach ($group['skills'] as $skill)
-                                    <span class="skill-pill rounded-md border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/60 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                                        {{ $skill }}
+                                    <span class="skill-pill inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-300/80 bg-slate-100/90 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-all duration-200 hover:border-emerald-500/50 hover:bg-white hover:text-emerald-600 dark:border-zinc-700/60 dark:bg-zinc-800/80 dark:text-zinc-200 dark:hover:border-emerald-500/50 dark:hover:bg-zinc-800 dark:hover:text-emerald-400">
+                                        @if (($skill['source'] ?? '') === 'simple')
+                                            <img
+                                                src="https://cdn.simpleicons.org/{{ $skill['slug'] }}/{{ $skill['color'] ?? '10B981' }}"
+                                                alt=""
+                                                class="h-4 w-4 shrink-0 aspect-square object-contain"
+                                                loading="lazy"
+                                                decoding="async"
+                                            >
+                                        @else
+                                            <i data-lucide="{{ $skill['slug'] }}" class="h-4 w-4 shrink-0 aspect-square text-emerald-500 dark:text-emerald-400"></i>
+                                        @endif
+                                        <span class="whitespace-nowrap">{{ $skill['name'] }}</span>
                                     </span>
                                 @endforeach
                             </div>
@@ -1640,7 +2150,7 @@
             class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80"
             data-aos="fade-up"
             x-data='{
-                activeTable: "users",
+                activeTable: "developers",
                 tables: @json($schemaTables),
                 setTable(key) {
                     this.activeTable = key;
@@ -1649,16 +2159,16 @@
             }'
             x-init="$nextTick(() => window.initLucideIcons && window.initLucideIcons())"
         >
-            <div class="pointer-events-none absolute left-10 top-16 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute left-10 top-16 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Data Layer</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Database & System Architecture
+                        Database &amp; System <span class="section-title-accent">Architecture</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
-                        How I structure relational MySQL databases for performance and scale.
+                    <p class="section-lede text-base sm:text-lg">
+                        Personalized MySQL schema for this portfolio engine — developers, projects, and tech stack relationships.
                     </p>
                 </div>
 
@@ -1678,7 +2188,7 @@
                                 <span class="font-mono" x-text="table.label"></span>
                             </button>
                         </template>
-                    </div>
+                                    </div>
 
                     {{-- Schema body --}}
                     <div class="grid gap-0 lg:grid-cols-5">
@@ -1694,21 +2204,33 @@
                                       x-text="'App\\Models\\' + tables[activeTable].model"></span>
                             </div>
 
-                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-zinc-800">
-                                <table class="min-w-full text-left text-sm">
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-zinc-800/60">
+                                <table class="w-full border-collapse text-left text-sm">
                                     <thead class="bg-slate-100/80 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-900/80">
-                                        <tr>
-                                            <th class="px-3 py-2.5 font-semibold">Column</th>
-                                            <th class="px-3 py-2.5 font-semibold">Type</th>
-                                            <th class="px-3 py-2.5 font-semibold">Attrs</th>
+                                        <tr class="border-b border-slate-200/80 dark:border-zinc-800/60">
+                                            <th class="whitespace-nowrap px-4 py-3.5 font-semibold">Column</th>
+                                            <th class="whitespace-nowrap px-4 py-3.5 font-semibold">Type</th>
+                                            <th class="w-full px-4 py-3.5 font-semibold">Attrs</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template x-for="(col, i) in tables[activeTable].columns" :key="i">
-                                            <tr class="border-t border-slate-200/80 transition-colors hover:bg-emerald-500/5 dark:border-zinc-800/80">
-                                                <td class="px-3 py-2.5 font-mono text-emerald-700 dark:text-emerald-400" x-text="col.name"></td>
-                                                <td class="px-3 py-2.5 font-mono text-violet-700 dark:text-violet-300" x-text="col.type"></td>
-                                                <td class="px-3 py-2.5 text-xs text-zinc-500" x-text="col.attrs || '—'"></td>
+                                            <tr class="border-b border-slate-200/80 transition-colors last:border-b-0 hover:bg-emerald-500/5 dark:border-zinc-800/60">
+                                                <td class="whitespace-nowrap px-4 py-3.5 align-middle font-mono text-sm font-medium text-emerald-700 dark:text-emerald-400" x-text="col.name"></td>
+                                                <td class="whitespace-nowrap px-4 py-3.5 align-middle font-mono text-sm text-violet-700 dark:text-violet-300" x-text="col.type"></td>
+                                                <td class="px-4 py-3.5 align-middle">
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 py-1 font-mono text-xs leading-none"
+                                                        :class="(col.name === 'created_at' || col.type === 'timestamps' || (col.attrs && String(col.attrs).includes('auto-generated')))
+                                                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                                                            : 'border-zinc-300/70 bg-slate-100/90 text-zinc-600 dark:border-zinc-700/50 dark:bg-zinc-800/80 dark:text-zinc-300'"
+                                                    >
+                                                        <template x-if="col.name === 'created_at' || col.type === 'timestamps' || (col.attrs && String(col.attrs).includes('auto-generated'))">
+                                                            <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true"></span>
+                                                        </template>
+                                                        <span x-text="col.attrs || col.type || 'n/a'"></span>
+                                                    </span>
+                                                </td>
                                             </tr>
                                         </template>
                                     </tbody>
@@ -1853,15 +2375,15 @@
                 }
             }"
         >
-            <div class="pointer-events-none absolute left-1/4 top-10 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute left-1/4 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8" data-aos="fade-up">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32" data-aos="fade-up">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ System Logic</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Interactive API Terminal
+                        Interactive API <span class="section-title-accent">Terminal</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Test a sample REST API response built with Laravel structure.
                     </p>
                 </div>
@@ -1953,16 +2475,16 @@
 
         {{-- ===================== CASE STUDY ===================== --}}
         <section id="case-study" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute right-1/4 top-10 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute right-1/4 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Case Study</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        OrderOps API — Laravel + MySQL
+                        Portfolio API &amp; Dynamic <span class="section-title-accent">Architecture</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
-                        A compact architecture study of how I design relational schemas, Eloquent maps, and JSON API contracts for an order system.
+                    <p class="section-lede text-base sm:text-lg">
+                        How this personal developer platform models profile data, featured projects, and skills as a Laravel + MySQL API engine with live JSON responses.
                     </p>
                 </div>
 
@@ -1970,7 +2492,7 @@
                     <article class="glass-card rounded-2xl p-6 lg:col-span-3">
                         <h3 class="mb-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Problem → Approach</h3>
                         <p class="mb-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                            Support users placing multi-product orders with referential integrity, fast status lookups, and a clean Laravel API surface for a future SPA or mobile client.
+                            Build a high-performance personal developer API engine that serves real-time project metrics, skills data, and dynamic responses — so recruiters and clients can explore John Bryan Bolarde’s Full Stack / Laravel work through clean Eloquent relationships and JSON contracts, not static brochure pages alone.
                         </p>
 
                         <div class="mb-5 grid gap-3 sm:grid-cols-3">
@@ -1984,38 +2506,39 @@
                             </div>
                             <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-zinc-800 dark:bg-zinc-950/50">
                                 <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Focus</p>
-                                <p class="mt-1 text-sm text-zinc-700 dark:text-zinc-300">Indexes · FKs · Clear contracts</p>
+                                <p class="mt-1 text-sm text-zinc-700 dark:text-zinc-300">Profile · Projects · Tech stack</p>
                             </div>
                         </div>
 
                         <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">Migration highlights</h4>
-                        <pre class="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-[11px] leading-relaxed text-zinc-300 sm:text-xs"><code><span class="text-zinc-500">// create_orders_table</span>
+                        <pre class="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-[11px] leading-relaxed text-zinc-300 sm:text-xs"><code><span class="text-zinc-500">// create_projects_table</span>
 $table-&gt;<span class="text-violet-300">id</span>();
-$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'user_id'</span>)-&gt;constrained()-&gt;cascadeOnDelete();
-$table-&gt;<span class="text-violet-300">string</span>(<span class="text-emerald-400">'status'</span>)-&gt;index();
-$table-&gt;<span class="text-violet-300">decimal</span>(<span class="text-emerald-400">'total'</span>, 10, 2);
-$table-&gt;<span class="text-violet-300">timestamp</span>(<span class="text-emerald-400">'placed_at'</span>)-&gt;nullable()-&gt;index();
+$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'developer_id'</span>)-&gt;constrained()-&gt;cascadeOnDelete();
+$table-&gt;<span class="text-violet-300">string</span>(<span class="text-emerald-400">'title'</span>);
+$table-&gt;<span class="text-violet-300">string</span>(<span class="text-emerald-400">'slug'</span>)-&gt;unique();
+$table-&gt;<span class="text-violet-300">string</span>(<span class="text-emerald-400">'architecture'</span>)-&gt;default(<span class="text-emerald-400">'Laravel MVC + REST API'</span>);
+$table-&gt;<span class="text-violet-300">boolean</span>(<span class="text-emerald-400">'is_featured'</span>)-&gt;default(<span class="text-amber-300">false</span>)-&gt;index();
 $table-&gt;<span class="text-violet-300">timestamps</span>();
 
-<span class="text-zinc-500">// order_product pivot</span>
-$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'order_id'</span>)-&gt;constrained();
-$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'product_id'</span>)-&gt;constrained();
-$table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="text-emerald-400">'qty'</span>);</code></pre>
+<span class="text-zinc-500">// project_tech_stack pivot</span>
+$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'project_id'</span>)-&gt;constrained();
+$table-&gt;<span class="text-violet-300">foreignId</span>(<span class="text-emerald-400">'tech_stack_id'</span>)-&gt;constrained();
+$table-&gt;<span class="text-violet-300">unsignedTinyInteger</span>(<span class="text-emerald-400">'weight'</span>)-&gt;default(1);</code></pre>
                     </article>
 
                     <aside class="glass-card flex flex-col rounded-2xl p-6 lg:col-span-2">
                         <h3 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Relationship map</h3>
                         <div class="mb-5 space-y-3 font-mono text-xs text-zinc-600 dark:text-zinc-300">
-                            <div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">User <span class="text-emerald-500">hasMany</span> Order</div>
-                            <div class="rounded-lg border border-violet-500/25 bg-violet-500/5 px-3 py-2">Order <span class="text-violet-400">belongsToMany</span> Product</div>
-                            <div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">Product <span class="text-emerald-500">belongsTo</span> User <span class="text-zinc-500">(seller)</span></div>
+                            <div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">Developer <span class="text-emerald-500">hasMany</span> Projects</div>
+                            <div class="rounded-lg border border-violet-500/25 bg-violet-500/5 px-3 py-2">Project <span class="text-violet-400">belongsToMany</span> TechStack</div>
+                            <div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2">TechStack <span class="text-emerald-500">belongsTo</span> Developer</div>
                         </div>
 
                         <h4 class="mb-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">API surface</h4>
                         <ul class="mb-5 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">GET /api/v1/orders</span></li>
-                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">POST /api/v1/orders</span></li>
-                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">GET /api/v1/products?sku=</span></li>
+                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">GET /api/v1/developer/profile</span></li>
+                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">GET /api/v1/projects?featured=true</span></li>
+                            <li class="flex gap-2"><span class="text-emerald-500">→</span> <span class="font-mono text-xs sm:text-sm">POST /api/v1/contact/inquire</span></li>
                         </ul>
 
                         <p class="mt-auto text-xs leading-relaxed text-zinc-500">
@@ -2029,20 +2552,20 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
 
         {{-- ===================== JOURNEY TIMELINE ===================== --}}
         <section id="journey" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute left-1/3 top-16 h-56 w-56 rounded-full bg-violet-500/5 blur-3xl ambient-glow-delay"></div>
+            <div class="pointer-events-none absolute left-1/3 top-16 h-56 w-56 rounded-full bg-violet-500/20 blur-3xl opacity-80 ambient-glow-delay"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Work History</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        My Journey as a Developer
+                        My Journey as a <span class="section-title-accent">Developer</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Highlights that shape how I build software — from backend craft to continuous growth.
                     </p>
                 </div>
 
-                <div class="relative mx-auto max-w-3xl">
+                <div class="relative w-full">
                     {{-- Vertical line centered on the 32px (w-8) rail --}}
                     <div class="absolute bottom-3 left-4 top-3 w-0.5 -translate-x-1/2 timeline-line opacity-70"></div>
 
@@ -2058,7 +2581,7 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
                                     <span class="relative flex h-4 w-4 items-center justify-center">
                                         <span class="absolute inset-0 animate-ping rounded-full bg-emerald-400/35"></span>
                                         <span class="relative block h-3.5 w-3.5 rounded-full border-2 border-emerald-400 bg-zinc-50 dark:bg-zinc-950 shadow-[0_0_14px_rgba(52,211,153,0.7)]"></span>
-                                    </span>
+                                        </span>
                                 </div>
                                 <button
                                     type="button"
@@ -2075,31 +2598,31 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
                                     <p class="mt-3 text-xs font-medium text-violet-600 dark:text-violet-400">Click for technical breakdown →</p>
                                 </button>
                             </li>
-                        @endforeach
+                                    @endforeach
                     </ol>
-                </div>
+                                </div>
             </div>
         </section>
 
         {{-- ===================== SERVICES ===================== --}}
         <section id="services" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute right-10 top-20 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute right-10 top-20 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Capabilities</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Services & Capabilities
+                        Services &amp; <span class="section-title-accent">Capabilities</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Tailored full-stack solutions built for performance and scalability.
                     </p>
                 </div>
 
-                <div class="grid gap-4 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-8">
                     @foreach ($serviceCards as $index => $card)
                         <article
-                            class="interactive-card glass-card group rounded-xl p-6"
+                            class="interactive-card glass-card group relative h-full w-full rounded-xl p-6"
                             data-aos="fade-up"
                             data-aos-delay="{{ ($index + 1) * 100 }}"
                         >
@@ -2118,136 +2641,233 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
         </section>
 
         {{-- ===================== CODE ACTIVITY ===================== --}}
+        @php
+            $activityMetrics = [
+                '🚀 100% Clean Architecture',
+                '⚡ < 50ms API Response Time',
+                '🔥 Continuous Commits',
+                '✅ Production-Ready Code',
+            ];
+            // Deterministic mock contribution heatmap (12 weeks × 7 days)
+            $heatPattern = [0,1,2,1,3,2,4,1,0,2,3,4,2,1,3,4,3,2,1,0,2,3,4,3,2,4,3,1,2,3,4,2,1,0,1,2,3,4,3,2,4,3,2,1,3,4,2,1,0,2,3,1,4,3,2,1,3,4,2,0,1,2,4,3,2,1,3,2,4,3,1,2,0,1,3,4,2,3,1,2,4,3,2,1];
+            $heatClasses = [
+                0 => 'bg-zinc-700/40 dark:bg-zinc-800',
+                1 => 'bg-emerald-500/25',
+                2 => 'bg-emerald-500/45',
+                3 => 'bg-emerald-500/70',
+                4 => 'bg-emerald-400',
+            ];
+            $activityCardClass = 'interactive-card group flex h-full w-full flex-col justify-between rounded-2xl border border-slate-200/80 bg-white/50 p-6 backdrop-blur-md transition-all duration-300 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-zinc-800/80 dark:bg-zinc-900/40';
+        @endphp
         <section id="activity" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute right-1/4 top-16 h-64 w-64 rounded-full bg-violet-500/5 blur-3xl ambient-glow-delay"></div>
+            <div class="pointer-events-none absolute right-1/4 top-16 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl opacity-80 ambient-glow-delay"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Code Pulse</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Code Activity & Commitment
+                        Code Activity &amp; <span class="section-title-accent">Commitment</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Consistent growth and continuous shipping.
                     </p>
                 </div>
 
-                <div class="grid gap-4 lg:grid-cols-3">
+                {{-- Metric pills --}}
+                <div class="mb-8 flex flex-wrap gap-2.5 sm:gap-3" data-aos="fade-up" data-aos-delay="60">
+                    @foreach ($activityMetrics as $metric)
+                        <span class="inline-flex items-center rounded-full border border-slate-200/80 bg-white/70 px-3.5 py-2 text-xs font-semibold text-zinc-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-emerald-500/40 hover:text-emerald-700 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:text-zinc-200 dark:hover:border-emerald-500/40 dark:hover:text-emerald-300 sm:text-sm">
+                            {{ $metric }}
+                        </span>
+                    @endforeach
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {{-- Card 1: Primary Stack --}}
-                    <article class="interactive-card glass-card rounded-xl p-6" data-aos="fade-up" data-aos-delay="100">
-                        <div class="mb-5 flex items-center gap-3">
-                            <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
-                                <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Primary Stack</h3>
-                        </div>
-                        <p class="mb-5 text-sm text-zinc-600 dark:text-zinc-400">PHP / Laravel / JavaScript / MySQL</p>
-                        <div class="space-y-4">
-                            @foreach ($stackBars as $bar)
-                                <div>
-                                    <div class="mb-1.5 flex items-center justify-between text-xs">
-                                        <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $bar['label'] }}</span>
-                                        <span class="text-emerald-600 dark:text-emerald-400">{{ $bar['percent'] }}%</span>
-                                    </div>
-                                    <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
-                                        <div
-                                            class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-violet-500"
-                                            style="width: {{ $bar['percent'] }}%"
-                                        ></div>
-                                    </div>
+                    <article class="{{ $activityCardClass }}" data-aos="fade-up" data-aos-delay="100">
+                        <div>
+                            <div class="mb-5 flex items-center gap-3">
+                                <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
+                                    <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
                                 </div>
-                            @endforeach
+                                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Primary Stack</h3>
+                            </div>
+                            <p class="mb-5 text-sm text-zinc-600 dark:text-zinc-400">PHP / Laravel / JavaScript / MySQL</p>
+                            <div class="space-y-4" data-stack-bars>
+                                @foreach ($stackBars as $bar)
+                                    <div>
+                                        <div class="mb-1.5 flex items-center justify-between text-xs">
+                                            <span class="font-medium text-zinc-700 dark:text-zinc-300">{{ $bar['label'] }}</span>
+                                            <span class="text-emerald-600 dark:text-emerald-400">{{ $bar['percent'] }}%</span>
+                                        </div>
+                                        <div class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
+                                            <div
+                                                class="stack-bar-fill h-full rounded-full bg-gradient-to-r from-emerald-500 to-violet-500 transition-all duration-1000 ease-out"
+                                                data-target-width="{{ $bar['percent'] }}"
+                                                style="width: 0%"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </article>
 
                     {{-- Card 2: Code Quality --}}
-                    <article class="interactive-card glass-card rounded-xl p-6" data-aos="fade-up" data-aos-delay="200">
-                        <div class="mb-5 flex items-center gap-3">
-                            <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-violet-600 dark:text-violet-400">
-                                <i data-lucide="shield-check" class="h-5 w-5"></i>
+                    <article class="{{ $activityCardClass }}" data-aos="fade-up" data-aos-delay="200">
+                        <div>
+                            <div class="mb-5 flex items-center gap-3">
+                                <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-violet-600 dark:text-violet-400">
+                                    <i data-lucide="shield-check" class="h-5 w-5"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Code Quality</h3>
                             </div>
-                            <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Code Quality</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                                    Clean MVC Architecture
+                                </li>
+                                <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                                    Structured REST APIs
+                                </li>
+                                <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                                    Version Control (Git / GitHub)
+                                </li>
+                                <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                                    <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                                    Maintainable, documented code
+                                </li>
+                            </ul>
                         </div>
-                        <ul class="space-y-3">
-                            <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                                <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
-                                Clean MVC Architecture
-                            </li>
-                            <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                                <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
-                                Structured REST APIs
-                            </li>
-                            <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                                <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
-                                Version Control (Git / GitHub)
-                            </li>
-                            <li class="flex items-start gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                                <i data-lucide="check" class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
-                                Maintainable, documented code
-                            </li>
-                        </ul>
                     </article>
 
                     {{-- Card 3: Availability --}}
-                    <article class="interactive-card glass-card rounded-xl p-6" data-aos="fade-up" data-aos-delay="300">
-                        <div class="mb-5 flex items-center gap-3">
-                            <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
-                                <i data-lucide="briefcase" class="h-5 w-5"></i>
+                    <article class="{{ $activityCardClass }}" data-aos="fade-up" data-aos-delay="300">
+                        <div>
+                            <div class="mb-5 flex items-center gap-3">
+                                <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
+                                    <i data-lucide="briefcase" class="h-5 w-5"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Availability</h3>
                             </div>
-                            <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Availability</h3>
+                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </span>
+                                Open for opportunities
+                            </div>
+                            <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                                Ready for Full-Time Backend/Full Stack Roles &amp; Selected Freelance Projects.
+                            </p>
                         </div>
-                        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                            <span class="relative flex h-2 w-2">
-                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-                                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                            </span>
-                            Open for opportunities
-                        </div>
-                        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                            Ready for Full-Time Backend/Full Stack Roles &amp; Selected Freelance Projects.
-                        </p>
                         <a href="#contact"
-                           class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-300 transition-all duration-300 hover:gap-3 hover:text-violet-800 dark:hover:text-violet-200">
+                           class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition-all duration-300 hover:gap-3 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200">
                             Let's talk
                             <i data-lucide="arrow-right" class="h-4 w-4"></i>
                         </a>
                     </article>
+
+                    {{-- Card 4: Git Activity --}}
+                    <article class="{{ $activityCardClass }}" data-aos="fade-up" data-aos-delay="400">
+                        <div>
+                            <div class="mb-5 flex items-center gap-3">
+                                <div class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/20 to-violet-500/20 text-emerald-600 dark:text-emerald-400">
+                                    <i data-lucide="git-commit" class="h-5 w-5"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Git Activity &amp; Shipping Rate</h3>
+                            </div>
+
+                            <div class="mb-4 grid grid-cols-12 gap-1" aria-hidden="true">
+                                @foreach ($heatPattern as $level)
+                                    <span class="aspect-square rounded-[3px] {{ $heatClasses[$level] ?? $heatClasses[0] }}"></span>
+                                @endforeach
+                            </div>
+
+                            <div class="mb-3 flex items-center gap-2 text-[10px] text-zinc-500">
+                                <span>Less</span>
+                                <span class="h-2.5 w-2.5 rounded-[2px] bg-zinc-700/40 dark:bg-zinc-800"></span>
+                                <span class="h-2.5 w-2.5 rounded-[2px] bg-emerald-500/25"></span>
+                                <span class="h-2.5 w-2.5 rounded-[2px] bg-emerald-500/45"></span>
+                                <span class="h-2.5 w-2.5 rounded-[2px] bg-emerald-500/70"></span>
+                                <span class="h-2.5 w-2.5 rounded-[2px] bg-emerald-400"></span>
+                                <span>More</span>
+                            </div>
+
+                            <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">500+ Commits in 2026</p>
+                            <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-400">Main Language: PHP / Laravel</p>
+                        </div>
+
+                        @if ($portfolioGithub)
+                            <a href="{{ $portfolioGithub }}" target="_blank" rel="noopener noreferrer"
+                               class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:gap-3 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300">
+                                View GitHub Profile
+                                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                            </a>
+                        @else
+                            <a href="https://github.com/Bryan0624" target="_blank" rel="noopener noreferrer"
+                               class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition-all duration-300 hover:gap-3 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300">
+                                View GitHub Profile
+                                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                            </a>
+                        @endif
+                        </article>
                 </div>
             </div>
         </section>
 
         {{-- ===================== FAQ ===================== --}}
         <section id="faq" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" x-data="{ openFaq: 0 }" data-aos="fade-up">
-            <div class="pointer-events-none absolute left-10 top-24 h-56 w-56 rounded-full bg-violet-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute left-10 top-24 h-56 w-56 rounded-full bg-violet-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ FAQ</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Frequently Asked Questions
+                        Frequently Asked <span class="section-title-accent">Questions</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
-                        Quick answers to common questions about working with me.
+                    <p class="section-lede text-base sm:text-lg">
+                        Clear answers on availability, stack, databases, quality, and how I collaborate.
                     </p>
                 </div>
 
-                <div class="mx-auto max-w-3xl space-y-3">
+                <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                     @foreach ($faqItems as $index => $faq)
                         <div
-                            class="glass-card overflow-hidden rounded-xl transition-all duration-300 ease-in-out"
+                            class="faq-item overflow-hidden rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-md transition-all duration-300 dark:border-zinc-800/80 dark:bg-zinc-900/40"
+                            :class="openFaq === {{ $index }} ? 'is-active' : ''"
                             data-aos="fade-up"
-                            data-aos-delay="{{ ($index + 1) * 100 }}"
+                            data-aos-delay="{{ ($index + 1) * 70 }}"
                         >
                             <button
                                 type="button"
-                                class="flex w-full items-start justify-between gap-3 px-4 py-4 text-left transition-all duration-300 ease-in-out hover:bg-emerald-500/5 sm:items-center sm:gap-4 sm:px-6"
+                                class="flex w-full cursor-pointer items-start justify-between gap-3 px-5 py-5 text-left sm:items-center sm:gap-4 sm:px-6"
                                 @click="openFaq = openFaq === {{ $index }} ? null : {{ $index }}; $nextTick(() => window.initLucideIcons && window.initLucideIcons())"
                                 :aria-expanded="(openFaq === {{ $index }}).toString()"
                             >
-                                <span class="pr-2 text-sm font-semibold leading-snug text-zinc-900 dark:text-zinc-100 sm:text-base">{{ $faq['question'] }}</span>
+                                <span class="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
+                                    <span
+                                        class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300/80 bg-white/80 font-mono text-[11px] font-bold text-emerald-600 shadow-sm shadow-emerald-500/10 transition-all duration-300 dark:border-zinc-700/70 dark:bg-zinc-950/60 dark:text-emerald-400"
+                                        :class="openFaq === {{ $index }} ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.25)] dark:text-emerald-300' : ''"
+                                    >
+                                        {{ $faq['step'] }}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-500">
+                                            {{ $faq['step'] }}. {{ $faq['category'] }}
+                                        </span>
+                                        <span class="faq-question-text block text-sm font-semibold leading-snug text-zinc-900 transition-colors duration-300 dark:text-zinc-100 sm:text-base">
+                                            {{ $faq['question'] }}
+                                        </span>
+                                    </span>
+                                </span>
                                 <span
-                                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/60 text-emerald-600 dark:text-emerald-400 transition-all duration-300 ease-in-out"
-                                    :class="openFaq === {{ $index }} ? 'border-emerald-500/40 rotate-180' : ''"
+                                    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 transition-all duration-300 dark:border-zinc-700 dark:bg-zinc-800/60"
+                                    :class="openFaq === {{ $index }}
+                                        ? 'rotate-180 border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                                        : 'text-zinc-400'"
                                 >
                                     <i data-lucide="chevron-down" class="h-4 w-4"></i>
                                 </span>
@@ -2257,8 +2877,8 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
                                 :class="openFaq === {{ $index }} ? 'is-open' : ''"
                             >
                                 <div>
-                                    <div class="border-t border-slate-200 dark:border-zinc-800/80 px-5 pb-5 pt-3 sm:px-6">
-                                        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{{ $faq['answer'] }}</p>
+                                    <div class="mt-0 border-t border-slate-200/80 px-5 pb-5 pt-3 dark:border-zinc-800/60 sm:px-6">
+                                        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">{{ $faq['answer'] }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -2270,15 +2890,15 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
 
         {{-- ===================== CONTACT ===================== --}}
         <section id="contact" class="section-screen relative flex scroll-mt-24 snap-start flex-col justify-center border-t border-slate-200 dark:border-zinc-800/80" data-aos="fade-up">
-            <div class="pointer-events-none absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/5 blur-3xl ambient-glow"></div>
+            <div class="pointer-events-none absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/20 blur-3xl opacity-80 ambient-glow"></div>
 
-            <div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-6 max-w-2xl" data-aos="fade-up">
+            <div class="relative mx-auto w-full max-w-[1400px] px-6 py-20 md:px-12 md:py-28 lg:px-16 lg:py-32">
+                <div class="mb-8 max-w-3xl" data-aos="fade-up">
                     <span class="section-chip">✦ Get In Touch</span>
                     <h2 class="section-title mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        Let's Connect
+                        Let's <span class="section-title-accent">Connect</span>
                     </h2>
-                    <p class="text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
+                    <p class="section-lede text-base sm:text-lg">
                         Have a project in mind or want to collaborate? Drop me a message — I'd love to hear from you.
                     </p>
                 </div>
@@ -2316,16 +2936,16 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
                                     @if ($portfolioGithub)
                                         <a href="{{ $portfolioGithub }}" target="_blank" rel="noopener noreferrer"
                                            class="social-glow inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300"
-                                           aria-label="GitHub">
-                                            <i data-lucide="github" class="h-5 w-5"></i>
-                                        </a>
+                                       aria-label="GitHub">
+                                        <i data-lucide="github" class="h-5 w-5"></i>
+                                    </a>
                                     @endif
                                     @if ($portfolioLinkedin)
                                         <a href="{{ $portfolioLinkedin }}" target="_blank" rel="noopener noreferrer"
                                            class="social-glow inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300"
-                                           aria-label="LinkedIn">
-                                            <i data-lucide="linkedin" class="h-5 w-5"></i>
-                                        </a>
+                                       aria-label="LinkedIn">
+                                        <i data-lucide="linkedin" class="h-5 w-5"></i>
+                                    </a>
                                     @endif
                                     <a href="mailto:{{ $portfolioEmail }}"
                                        class="social-glow inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300"
@@ -2640,13 +3260,13 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
     <div
         x-show="cmdOpen"
         x-cloak
-        class="fixed inset-0 z-[95] flex items-start justify-center px-3 pt-[12vh] sm:px-4"
+        class="fixed inset-0 z-[95] flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
     >
         <div
-            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            class="absolute inset-0"
             x-show="cmdOpen"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
@@ -2658,7 +3278,7 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
         ></div>
 
         <div
-            class="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-zinc-700/60 bg-white/95 shadow-2xl shadow-black/30 backdrop-blur-xl dark:border-zinc-700/80 dark:bg-zinc-900/95"
+            class="cmd-palette relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-800/80 border-t-emerald-500/30 bg-zinc-900/80 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl"
             x-show="cmdOpen"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
@@ -2671,57 +3291,95 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
             @keydown.arrow-up.prevent="moveCmd(-1)"
             @keydown.enter.prevent="runActiveCommand()"
         >
-            <div class="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-zinc-800">
-                <i data-lucide="search" class="h-4 w-4 shrink-0 text-emerald-500"></i>
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-emerald-500/10 to-transparent" aria-hidden="true"></div>
+
+            <div class="relative flex items-center gap-3 border-b border-zinc-800/80 bg-zinc-900/40 px-5 py-4">
+                <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 shadow-[0_0_14px_rgba(16,185,129,0.25)]">
+                    <i data-lucide="search" class="h-4 w-4"></i>
+                </span>
                 <input
                     type="text"
                     x-ref="cmdInput"
                     x-model="cmdQuery"
                     @input="cmdActive = 0; $nextTick(() => window.initLucideIcons && window.initLucideIcons())"
                     placeholder="Search sections… (About, Skills, Contact)"
-                    class="w-full bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                    class="w-full bg-transparent pr-2 font-sans text-sm text-zinc-100 outline-none ring-0 placeholder-zinc-500 focus:outline-none focus:ring-0"
                     autocomplete="off"
                     spellcheck="false"
                 >
-                <kbd class="hidden rounded border border-slate-300 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 sm:inline dark:border-zinc-600">ESC</kbd>
+                <button
+                    type="button"
+                    class="shrink-0 rounded-md border border-zinc-700/60 bg-zinc-800/80 px-2 py-1 font-mono text-[10px] text-zinc-400 transition-colors duration-200 hover:border-emerald-500/40 hover:text-emerald-400"
+                    @click="closeCmd()"
+                    title="Close (Esc)"
+                >
+                    ESC
+                </button>
             </div>
 
-            <ul class="max-h-72 overflow-y-auto p-2" role="listbox">
+            <ul class="cmd-palette-scroll max-h-80 space-y-0.5 overflow-y-auto p-2" role="listbox">
                 <template x-for="(item, index) in filteredCommands" :key="item.href">
                     <li>
                         <button
                             type="button"
-                            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200"
+                            class="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-transparent p-3 text-left text-zinc-300 transition-all duration-200"
                             :class="cmdActive === index
-                                ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-                                : 'text-zinc-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-zinc-800/80'"
+                                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                                : 'hover:bg-zinc-800/60 hover:text-zinc-100'"
                             @click="jumpTo(item.href)"
                             @mouseenter="cmdActive = index"
                             role="option"
                             :aria-selected="(cmdActive === index).toString()"
                         >
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800/80">
-                                <i :data-lucide="item.icon" class="h-4 w-4"></i>
+                            <span class="flex min-w-0 flex-1 items-center gap-3">
+                                <span
+                                    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-200"
+                                    :class="cmdActive === index
+                                        ? 'border-emerald-500/35 bg-emerald-500/15 text-emerald-400'
+                                        : 'border-zinc-700/70 bg-zinc-950/60 text-zinc-400 group-hover:border-zinc-600 group-hover:text-zinc-200'"
+                                >
+                                    <i :data-lucide="item.icon" class="h-4 w-4"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-semibold leading-tight" x-text="item.label"></span>
+                                    <span
+                                        class="mt-0.5 block truncate text-xs transition-colors duration-200"
+                                        :class="cmdActive === index ? 'text-emerald-400/70' : 'text-zinc-500'"
+                                        x-text="item.hint"
+                                    ></span>
+                                </span>
                             </span>
-                            <span class="min-w-0 flex-1">
-                                <span class="block text-sm font-semibold" x-text="item.label"></span>
-                                <span class="block truncate text-xs text-zinc-500" x-text="item.hint"></span>
-                            </span>
-                            <span class="font-mono text-[10px] text-zinc-400" x-text="item.href"></span>
+                            <span class="shrink-0 rounded-md border border-zinc-700/50 bg-zinc-800/60 px-2 py-0.5 font-mono text-[11px] text-zinc-400" x-text="item.href"></span>
                         </button>
                     </li>
                 </template>
-                <li x-show="filteredCommands.length === 0" class="px-3 py-6 text-center text-sm text-zinc-500">
+                <li x-show="filteredCommands.length === 0" class="px-3 py-8 text-center text-sm text-zinc-500">
                     No sections match your search.
                 </li>
             </ul>
 
-            <div class="flex items-center justify-between border-t border-slate-200 px-4 py-2.5 text-[11px] text-zinc-500 dark:border-zinc-800">
-                <span>↑↓ navigate · Enter jump · Esc close</span>
+            <div class="flex items-center justify-between border-t border-zinc-800/80 bg-zinc-950/40 px-5 py-3 text-xs text-zinc-400">
+                <span class="inline-flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">↑</kbd>
+                        <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">↓</kbd>
+                        <span class="text-zinc-500">navigate</span>
+                    </span>
+                    <span class="text-zinc-700">·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Enter</kbd>
+                        <span class="text-zinc-500">jump</span>
+                    </span>
+                    <span class="text-zinc-700">·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Esc</kbd>
+                        <span class="text-zinc-500">close</span>
+                    </span>
+                </span>
                 <span class="inline-flex items-center gap-1">
-                    <kbd class="rounded border border-slate-300 px-1 font-mono dark:border-zinc-600">Ctrl</kbd>
-                    <span>+</span>
-                    <kbd class="rounded border border-slate-300 px-1 font-mono dark:border-zinc-600">K</kbd>
+                    <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Ctrl</kbd>
+                    <span class="text-zinc-600">+</span>
+                    <kbd class="rounded border border-zinc-700/60 bg-zinc-800/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">K</kbd>
                 </span>
             </div>
         </div>
@@ -2729,7 +3387,7 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
 
     {{-- ===================== FOOTER ===================== --}}
     <footer class="border-t border-slate-200 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/80 backdrop-blur-md py-10">
-        <div class="mx-auto grid max-w-6xl gap-8 px-4 text-center sm:grid-cols-3 sm:items-center sm:text-left sm:px-6 lg:px-8">
+        <div class="mx-auto grid w-full max-w-[1400px] gap-8 px-6 text-center sm:grid-cols-3 sm:items-center sm:text-left md:px-12 lg:px-16">
             {{-- Left --}}
             <div class="space-y-1.5 sm:justify-self-start">
                 <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
@@ -2766,14 +3424,14 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
             {{-- Right --}}
             <div class="sm:justify-self-end sm:text-right">
                 <p class="text-xs leading-relaxed text-zinc-500 dark:text-zinc-500 sm:text-sm">
-                    &copy; 2026 John Bryan. All rights reserved.
-                </p>
+                &copy; 2026 John Bryan. All rights reserved.
+            </p>
                 <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
-                    Built with
+                Built with
                     <span class="text-emerald-600 dark:text-emerald-400">Laravel</span>
-                    &amp;
+                &amp;
                     <span class="text-violet-600 dark:text-violet-400">Tailwind CSS</span>.
-                </p>
+            </p>
             </div>
         </div>
     </footer>
@@ -2801,12 +3459,13 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
 
             if (window.AOS) {
                 AOS.init({
-                    duration: 800,
-                    once: false, // Allows animations to repeat on scroll up and down
-                    mirror: true, // Animates elements out when scrolling past them
-                    offset: window.innerWidth < 640 ? 40 : 100,
+                    duration: 750,
+                    once: false,
+                    mirror: true,
+                    offset: window.innerWidth < 640 ? 32 : 80,
                     easing: 'ease-out-cubic',
-                    disable: false,
+                    anchorPlacement: 'top-bottom',
+                    disableMutationObserver: false,
                 });
             }
 
@@ -2872,7 +3531,6 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
 
             // Philippine live clock (Asia/Manila)
             const clockEls = [
-                document.getElementById('ph-clock'),
                 document.getElementById('ph-clock-footer'),
             ].filter(Boolean);
             const tickClock = () => {
@@ -2892,6 +3550,30 @@ $table-&gt;<span class="text-violet-300">unsignedInteger</span>(<span class="tex
             };
             tickClock();
             setInterval(tickClock, 1000);
+
+            // Animate Primary Stack bars when Activity section scrolls into view
+            const stackBarsRoot = document.querySelector('[data-stack-bars]');
+            if (stackBarsRoot && 'IntersectionObserver' in window) {
+                const fills = stackBarsRoot.querySelectorAll('.stack-bar-fill[data-target-width]');
+                const animateBars = () => {
+                    fills.forEach((bar) => {
+                        const target = bar.getAttribute('data-target-width') || '0';
+                        bar.style.width = target + '%';
+                    });
+                };
+                const barObserver = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                requestAnimationFrame(() => requestAnimationFrame(animateBars));
+                                barObserver.disconnect();
+                            }
+                        });
+                    },
+                    { threshold: 0.35 }
+                );
+                barObserver.observe(stackBarsRoot);
+            }
 
             // Typewriter effect for hero role title
             const roles = [
